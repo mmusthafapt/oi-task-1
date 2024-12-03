@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.name }}
+  labels:
+    app: {{ .Values.frontend.name }}
+    group: {{ .Values.frontend.group }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.frontend.name }}
+        group: {{ .Values.frontend.group }}
+    spec:
+      volumes:
+        - name: {{ .Values.frontend.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.frontend.volume.pvc.name }}
+      containers:
+        - name: {{ .Values.frontend.name }}
+          image: {{ .Values.frontend.container.image }}  
+          ports:
+            - containerPort: {{ .Values.frontend.container.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.frontend.config.name }}
+          volumeMounts:             
+            - name: {{ .Values.frontend.volume.name }}
+              mountPath: {{ .Values.frontend.volume.mountPath }} 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.name }}
+  labels: 
+    group: {{ .Values.frontend.group }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  selector:             
+    app: {{ .Values.frontend.name }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}       
+      targetPort: {{ .Values.frontend.container.port }}                     
+
+--- 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.frontend.config.name }}
+  labels:
+    group: {{ .Values.frontend.group }}
+data: 
+{{- range .Values.frontend.config.data }}
+  {{ .key }}: {{ .value }}
+{{- end}}      

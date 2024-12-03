@@ -1,0 +1,23 @@
+frontend:
+  name: oi-front
+  group: frontend
+  volume:
+    name: oi-volume
+    pvc:
+      name: oi-pvc
+    mountPath: /var/www/html  
+  container:
+    image: <frontend-image>
+    port: 8080
+  config:
+    name: oi-config
+  service:
+    type: clusterIP
+    port: 80
+replicaCount: 3
+ingress:
+  class: default
+  path: /path
+  pathType: Prefix
+  servicePort: 8080
+  
