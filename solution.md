@@ -93,7 +93,7 @@ Automation of the microservices deployment can be achieved using GitOps with **A
     - Acceptance testing: Whether the application meet the specified requirements 
     - Security testing: Look for vulnerabilities and other security flaws
 
-## Monitoring Approach
+## Logging and Monitoring Approach (Observability)
 
 ### Tools for monitoring:
 1. **Prometheus:** Promtheus is a powerful, flexible monitoring solution used for collecting and storing metrics from different services. It scrapes metrics from instrumented jobs and stores them in a time series database. We can collect metrics from microservices with prometheus client libraries (client for node, golang, java, etc.), from nodes with nodeExporter and from Kubernetes objects with *Kube-State-Metrics*.
@@ -103,7 +103,32 @@ Automation of the microservices deployment can be achieved using GitOps with **A
     helm repo update
     helm install [RELEASE_NAME] prometheus-community/prometheus
     ```
-    - 
+    - An example prometheus.yaml is shown at src/prometheus/prometheus.yaml
+
+2. **ELK Stack (Log Management):** The ELK (Elasticsearch, Logstash and Kibana) is a powerful stack for collecting storing and visualizing log data. The below components can be used for proper log management.
+    - Filebeat/Fluent bit: Helps to collect logs from each kubernetes nodes. Can be installed as a daemonset in the cluster. Helm charts are available for [filebeat](https://github.com/elastic/helm-charts/blob/main/filebeat/README.md) and [fluentbit](https://github.com/fluent/helm-charts) installation to the cluster.
+    - Logstash: Processes and ingest log data into Elasticsearch.  
+    - Elasticsearch: Stores and indexes log data.
+    - Kibana: Visualizes log data through customizable dashboards.
+    - Deploy [ECK] (https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html) on Kubernetes cluster to manage elasticsearch, kibana and logstash on the cluster.
+    - Automation of deployment of filebeat/fluentbit can be achieved by adding them as Applicationsets in the ArgoCD.
+
+3. **Grafana (Metrics Visualization):** 
+    - Grafana provides beautiful dashboards to visualize metrics collected by Prometheus and ELK. It uses prometheus , Elasticsearch as data source and deplay it in customizable dashboards. 
+    - An example dashboard configuration can be seen in src/grafana/dashboard.json
+    - Grafana provides an *Alertmanager* to configure and handle alerts.
+    - These alerts can be integrated with Slack, PagerDuty and other messaging services.
+    - Grafana also provide helm chart for installation in Kubernetes. Adding it to the ArgoCD as an applicationset automate the management of Grafana
+
+4. **AWS CloudWatch:** 
+    - Monitor AWS Resources.
+    - It collects and tracks metrics, collects and monitors log files, and sets alarms.
+
+Prometheus, Grafana & ELK stack can be installed and managed inside and ouside of the kubernetes cluster(on same or different). However, deploying them on the kubernetes cluster and automating its management with ArgoCD by adding Applicationsets for each components is the recommended approach.
+
+
+
+
 
 
 
