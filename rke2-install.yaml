@@ -1,0 +1,70 @@
+---
+- name: Install RKE2 on servers and agents
+  hosts: all
+  become: true
+  vars:
+    rke2_version: "v1.26.4"
+    rke2_channel: "stable"
+    rke2_role: "server"  # Change to "agent" for agent nodes
+    container_registry_config: |
+      mirrors:
+        "myregistry.local":
+          endpoint:
+            - "https://myregistry.local:5000"
+      configs:
+        "myregistry.local":
+          auth:
+            username: "myuser"
+            password: "mypassword"
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - curl
+          - jq
+        state: present
+
+    - name: Download RKE2 installation script
+      get_url:
+        url: https://get.rke2.io
+        dest: /tmp/get_rke2.sh
+        mode: '0755'
+
+    - name: Install RKE2
+      shell: |
+        INSTALL_RKE2_CHANNEL={{ rke2_channel }} INSTALL_RKE2_VERSION={{ rke2_version }} INSTALL_RKE2_TYPE={{ rke2_role }} sh /tmp/get_rke2.sh
+        systemctl enable rke2-{{ rke2_role }}
+        systemctl start rke2-{{ rke2_role }}
+      args:
+        executable: /bin/bash
+        
+    - name: Create RKE2 config directory
+      file:
+        path: /etc/rancher/rke2
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Add container registry configuration
+      copy:
+        dest: /etc/rancher/rke2/registries.yaml
+        content: "{{ container_registry_config }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Restart RKE2 service to apply changes
+      service:
+        name: "rke2-{{ rke2_role }}"
+        state: restarted
+
+    - name: Verify RKE2 installation
+      shell: rke2 --version
+      register: rke2_version_output
+      changed_when: false
+
+    - name: Print RKE2 version
+      debug:
+        msg: "{{ rke2_version_output.stdout }}"
