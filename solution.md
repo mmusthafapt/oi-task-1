@@ -16,20 +16,21 @@ Selecting the AWS as the infrastructure provider, below are the components to be
 
 ### Solution to Automate Infrastructure Deployment: Terraform
 Reason for choice: 
-Terraform allows defining the complete infrastructure in code provides reusable version controlled deployments
+    - allows defining the complete infrastructure in code 
+    - provides reusable version controlled deployments
 
 ## Orchestration technology and components
 **Kubernetes** is the preferred solution for handling container orchestration due to its scalability, HA & fault tolerance, extensive ecosystem and community support, service discovery, load balancing, security, etc.
 
-In our case we can go with EKS (for cloud environment) or RKE2 (for on-premises).
+In our case we can go with **EKS** (for cloud environment) or **RKE2** (for on-premises).
 
-EKS is a Managed distribution of Kubernetes from AWS. AWS handles the control plane management and help us avoid the control plane components heavy lifting. We would be able to concentrate more on the application deployment part.
+*EKS* is a Managed distribution of Kubernetes from AWS. AWS handles the control plane management and help us avoid the control plane components heavy lifting. We would be able to concentrate more on the application deployment part.
 
-Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components.
+Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components. An example usage shows [here](aws-vpc.tf)
 
 On the other hand, for on premises I prefer Rancher Kubernetes Engine 2 as it is one of the lightest, opensource, secure, simple yet flexible kubernetes engine that is ideal for enterprise production workloads. 
 
-Ansible can be used for automating the RKE2 installation on the VMs or BMs.
+Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once verified the pre-reuisites an ansible playbook similar to [rke2-install.yml](./rke2-install.yaml) can be used to automate rke2 installation on nodes.
 
 We can utilize the below components in the Kubernetes for our requirement:
 - Pods
@@ -41,23 +42,37 @@ We can utilize the below components in the Kubernetes for our requirement:
 - Horizontal Pod Autoscaler
 - Pod Disruption Budget
 
-Assuming the container images for the frontend and backend service have been developed already, we can create kubernetes deployment resources for frontend and backaend.
+Assuming the container images for the frontend and backend service have been developed already, frontend and backend microservices can be run as kubernetes *deployment* with multiple replicas. 
+
+*HPA* can be used for ensuring autoscaling of pods according to the cpu/memory/traffic usage. 
+
+*PDB*s can also be implemented to make sure there are no downtime incase of an upgrade or rollout. 
+
+These microservices can be deployed on nodes in the same nodegroup, *nodeSelectors* can be used to achieve this.
+
+Kubernetes *service* of type *ClusterIP* can be used to expose the frontend and backend microservices. 
+
+An *Ingress* objecr can be created listening to the  frontend clusterIP service. SSL is terminated at the ingress level. 
 
 There are two possible approaches for Postgres DB. We can either utilize the AWS RDS for postgresql if we are deploying it on the cloud environment or deploy postgresql as a statefulset inside Kubernetes if you are looking for more control over db.  
 
-Terraform can be used for the automation of RDS deployment and configuration. An example configuration shows here.
+Terraform can be used for the automation of RDS deployment and configuration. An example configuration shows [here](src/postgres/aws-rds.tf).
 
-PostgreSQL can be deployed in kubernetes as a statefulset with required storage provided by PVC. A sample is shown here.
+PostgreSQL can be deployed in kubernetes as a statefulset with required storage provided by PVC. A sample is shown [here](src/postgres/postgres-sts.yaml).
 
 ## Automate the microservices deployment
-Packaging all the microservices with **helm** eases the deployment and management of microservices with related components. A sampple helm package has is shown in src/helm. Create helm packages for frontend, backend and Database application.
+Packaging all the microservices with **helm** eases the deployment and management of microservices with related components. 
+A sampple helm package has is shown in src/helm. Create helm packages for frontend, backend and Database application.
+
 Note: There are popular third party helm packages available For PostgreSQL database like **Bitnami/Posgresql**. Using these packages avoid the complexity upto a certain level. 
 
 Automation of the microservices deployment can be achieved using GitOps with **ArgoCD** or similar tools. ArgoCD is a more mature GitOps tool with self healing, multi-cluster support and a rich web ui. It support Helm, Kustomize, jsonnet and plain YAML. 
 
-- Install the ArgoCD on the kubernetes cluster with helm https://github.com/argoproj/   argo-helm/tree/main/charts/argo-cd 
+- Install the ArgoCD on a kubernetes cluster with helm https://github.com/argoproj/   argo-helm/tree/main/charts/argo-cd 
 - Add an *ApplicationSet* for Frontend, backend and DB applications. An example is available in src/Argo/example-applicationset.yaml
 - Create applicatoinsets for backend and database applications as well.
+
+Secrets and confidential information can be securely handle with the help of Hashicorp Vault/ AWS Secret manager. Hashicorp vault can be inside or outside the kubernetes cluster. In both cases we need to integrate it with the kubernetes cluster where microservices run. 
 
 ## Release life cycle
 1. **Development:**
@@ -103,7 +118,7 @@ Automation of the microservices deployment can be achieved using GitOps with **A
     helm repo update
     helm install [RELEASE_NAME] prometheus-community/prometheus
     ```
-    - An example prometheus.yaml is shown at src/prometheus/prometheus.yaml
+    - An example prometheus.yaml is shown in [prometheus.yaml](src/prometheus/prometheus.yaml)
 
 2. **ELK Stack (Log Management):** The ELK (Elasticsearch, Logstash and Kibana) is a powerful stack for collecting storing and visualizing log data. The below components can be used for proper log management.
     - Filebeat/Fluent bit: Helps to collect logs from each kubernetes nodes. Can be installed as a daemonset in the cluster. Helm charts are available for [filebeat](https://github.com/elastic/helm-charts/blob/main/filebeat/README.md) and [fluentbit](https://github.com/fluent/helm-charts) installation to the cluster.
@@ -124,7 +139,7 @@ Automation of the microservices deployment can be achieved using GitOps with **A
     - Monitor AWS Resources.
     - It collects and tracks metrics, collects and monitors log files, and sets alarms.
 
-Prometheus, Grafana & ELK stack can be installed and managed inside and ouside of the kubernetes cluster(on same or different). However, deploying them on the kubernetes cluster and automating its management with ArgoCD by adding Applicationsets for each components is the recommended approach.
+Prometheus, Grafana, vault & ELK stack can be installed and managed inside and ouside of the kubernetes cluster(on same or different). However, deploying them on the kubernetes cluster and automating its management with ArgoCD by adding Applicationsets for each components is the recommended approach.
 
 
 
