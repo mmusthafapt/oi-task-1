@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: oi-frontend
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - list:
+      elements:
+      - cluster: engineering-prod
+        url: https://2.4.6.8
+  template:
+    metadata:
+      name: '{{.cluster}}-oi-front'
+    spec:
+      project: oi-project
+      source:
+        repoURL: https://github.com/infra-team/cluster-deployments.git
+        targetRevision: HEAD
+        path: oi-front/{{.cluster}}
+        helm:
+          releaseName: "{{appName}}"
+          valueFiles:
+          - "values.yaml"
+          - "../../values/{{name}}/{{appName}}/values.yaml"        
+      destination:
+        server: '{{.url}}'
+        namespace: oi-front
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true        
