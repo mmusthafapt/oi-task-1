@@ -8,16 +8,46 @@ The proposed solution for this task includes below key points:
 4. The testing approach for the infrastructure
 5. The Logging and monitoring approach (obeservability) for the solution
 
+## Infrastructure Platform to Use
+### Cloud (AWS)
+The infrastructure platform selection depends on the environment where the microservice to be deployed. 
+
+- A cloud-based infrastructure would be ideal due to its flexibility, scalability, and availability. A number of cloud providers can be considered. 
+    1. AWS (Amazon Web Services)
+    
+        AWS comes with multiple services which can be used for deployment and scaling of microservices. Services like ECS and EKS are highly suitable for microservices deployment with autoscaling and high availability. 
+    
+        Due to its extensive flexibility, portability and advanced features EKS would be the more preferable solution for hosting the microservices.
+
+    2. Azure
+
+        Azure AKS provides similar stack for Kubernetes (Azure Kubernetes Service, AKS) and managed PostgreSQL services, with good autoscaling, monitoring, and deployment tools
+
+    3. Google Cloud Platform (GCP)
+    
+        GCP Provides services like GKE and cloud SQL for postgresql which ensures high availability and autoscaling 
+
+### On premises
+- In an on-premise environment, Use of bare metal or virtual servers would be the options to have required compute power. To achieve high availability, redundancy and continuos service availability you need to have:
+    1. Redundant power supply and networking 
+    2. Hardware redundancy with Dual power supplies, raid configurations and redundant hardwares.
+    3. KVM , VMWare, etc provide virtualization and make sure VMs are automatically restarted on another host incase of failures
+    4. Storage redundancy with SAN/NAS , Distributed storage systems 
+
+    Microservices can be containerized and deployed on Kubernetes clusters created with VMs or BMs as nodes. Kubernetes engines like RedHat Openshift, VMWare Tanzu, Rancher Kubernetes Engine are some available options.
+
+
 ## Infrastructure automation on AWS
 Selecting the AWS as the infrastructure provider, below are the components to be created:
 - Virtual Private Cloud (VPC) for network isolation and related components like subnet, route table, IGW, NAT Gateway (for private subnet)
 - EC2 Instances (for Bastion) and EKS for container orchestration
-- RDS for PostgreSQL (optional as Posgres can be deployed in EKS as well) 
+- RDS for PostgreSQL (optional as PosgreSQL can be deployed in EKS as well) 
 
-### Solution to Automate Infrastructure Deployment: Terraform
+#### Solution to Automate Infrastructure Deployment: Terraform
 Reason for choice: 
-    - allows defining the complete infrastructure in code 
-    - provides reusable version controlled deployments
+- Allows defining the complete infrastructure in code 
+- Provides reusable version controlled deployments
+- An example for VPC creation with terraform shown [here](./aws-vpc.tf)
 
 ## Orchestration technology and components
 **Kubernetes** is the preferred solution for handling container orchestration due to its scalability, HA & fault tolerance, extensive ecosystem and community support, service discovery, load balancing, security, etc.
@@ -26,11 +56,11 @@ In our case we can go with **EKS** (for cloud environment) or **RKE2** (for on-p
 
 *EKS* is a Managed distribution of Kubernetes from AWS. AWS handles the control plane management and help us avoid the control plane components heavy lifting. We would be able to concentrate more on the application deployment part.
 
-Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components. An example usage shows [here](aws-vpc.tf)
+Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components. An example usage shows [here](aws-eks.tf).
 
 On the other hand, for on premises I prefer Rancher Kubernetes Engine 2 as it is one of the lightest, opensource, secure, simple yet flexible kubernetes engine that is ideal for enterprise production workloads. 
 
-Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once verified the pre-reuisites an ansible playbook similar to [rke2-install.yml](./rke2-install.yaml) can be used to automate rke2 installation on nodes.
+Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once the pre-requisites are verified an ansible playbook similar to [rke2-install.yml](./rke2-install.yaml) can be used to automate rke2 installation on nodes.
 
 We can utilize the below components in the Kubernetes for our requirement:
 - Pods
@@ -62,13 +92,13 @@ PostgreSQL can be deployed in kubernetes as a statefulset with required storage 
 
 ## Automate the microservices deployment
 Packaging all the microservices with **helm** eases the deployment and management of microservices with related components. 
-A sampple helm package has is shown in src/helm. Create helm packages for frontend, backend and Database application.
+A sampple helm package has is shown in [src/helm](src/helm/). Create helm packages for frontend, backend and Database application.
 
 Note: There are popular third party helm packages available For PostgreSQL database like **Bitnami/Posgresql**. Using these packages avoid the complexity upto a certain level. 
 
 Automation of the microservices deployment can be achieved using GitOps with **ArgoCD** or similar tools. ArgoCD is a more mature GitOps tool with self healing, multi-cluster support and a rich web ui. It support Helm, Kustomize, jsonnet and plain YAML. 
 
-- Install the ArgoCD on a kubernetes cluster with helm https://github.com/argoproj/   argo-helm/tree/main/charts/argo-cd 
+- Install the ArgoCD on a kubernetes cluster with [helm](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd) 
 - Add an *ApplicationSet* for Frontend, backend and DB applications. An example is available in src/Argo/example-applicationset.yaml
 - Create applicatoinsets for backend and database applications as well.
 
