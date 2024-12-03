@@ -1,0 +1,29 @@
+{
+    "dashboard": {
+      "id": null,
+      "title": "Microservices Metrics",
+      "panels": [
+        {
+          "type": "graph",
+          "title": "CPU Usage",
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace='default'}[1m])) by (pod)",
+              "legendFormat": "{{ pod }}"
+            }
+          ]
+        },
+        {
+          "type": "graph",
+          "title": "Memory Usage",
+          "targets": [
+            {
+              "expr": "sum(container_memory_usage_bytes{namespace='default'}) by (pod)",
+              "legendFormat": "{{ pod }}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  
