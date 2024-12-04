@@ -9,7 +9,6 @@ The proposed solution for this task includes below key points:
 5. The Logging and monitoring approach (obeservability) for the solution
 
 ## Infrastructure Platform to Use
-### Cloud (AWS)
 The infrastructure platform selection depends on the environment where the microservice to be deployed. 
 
 - A cloud-based infrastructure would be ideal due to its flexibility, scalability, and availability. A number of cloud providers can be considered. 
@@ -27,7 +26,6 @@ The infrastructure platform selection depends on the environment where the micro
     
         GCP Provides services like GKE and cloud SQL for postgresql which ensures high availability and autoscaling 
 
-### On premises
 - In an on-premise environment, Use of bare metal or virtual servers would be the options to have required compute power. To achieve high availability, redundancy and continuos service availability you need to have:
     1. Redundant power supply and networking 
     2. Hardware redundancy with Dual power supplies, raid configurations and redundant hardwares.
