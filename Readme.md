@@ -45,7 +45,7 @@ Selecting the AWS as the infrastructure provider, below are the components to be
 Reason for choice: 
 - Allows defining the complete infrastructure in code 
 - Provides reusable version controlled deployments
-- An example for VPC creation with terraform shown [here](./aws-vpc.tf)
+- An example for VPC creation with terraform shown [here](src/infra-automation/aws-vpc.tf)
 
 ## Orchestration technology and components
 **Kubernetes** is the preferred solution for handling container orchestration due to its scalability, HA & fault tolerance, extensive ecosystem and community support, service discovery, load balancing, security, etc.
@@ -54,17 +54,17 @@ In our case we can go with **EKS** (for cloud environment) or **RKE2** (for on-p
 
 *EKS* is a Managed distribution of Kubernetes from AWS. AWS handles the control plane management and help us avoid the control plane components heavy lifting. We would be able to concentrate more on the application deployment part.
 
-Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components. An example usage shows [here](aws-eks.tf).
+Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components. An example usage shows [here](src/infra-automation/aws-eks.tf).
 
 On the other hand, for on premises Rancher Kubernetes Engine 2 is the preferred solution as it is one of the lightest, opensource, secure, simple yet flexible kubernetes engine that is ideal for enterprise production workloads. 
 
-Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once the pre-requisites are verified an ansible playbook similar to [rke2-install.yml](./rke2-install.yaml) can be used to automate rke2 installation on nodes.
+Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once the pre-requisites are verified an ansible playbook similar to [rke2-install.yml](src/infra-automation/rke2-install.yaml) can be used to automate rke2 installation on nodes.
 
 Once the Kubernetes cluster has been created with any of the above suggested approach, along with the basic components please make sure you have the below components also present in the cluster for application accessibility, monitoring:
 
-- An Ingress controller: Required to manage and route external traffic to services within the cluster. It also helps in Loadbalancing, SSL termination, path and host based routing. Nginx ingress controller or Aws Loadbalancer controller are some preferred solutions.
-- Metrics server: Is a cluster-wide aggregator of resource usage data. Helps in autoscaling, resource monitoring and debugging.
-- Storage Driver/Storage Class: Essential for managing and provisioning storage resources. Storage classes help in provisioning storage resources dynamically.
+- An **Ingress controller**: Required to manage and route external traffic to services within the cluster. It also helps in Loadbalancing, SSL termination, path and host based routing. Nginx ingress controller or Aws Loadbalancer controller are some preferred solutions.
+- **Metrics server**: A cluster-wide aggregator of resource usage data. Helps in autoscaling, resource monitoring and debugging.
+- **Storage Driver & Storage Class**: Essential for managing and provisioning storage resources. Storage classes help in provisioning storage resources dynamically.
      
 We can utilize the below components in the Kubernetes for our requirement:
 - Pods
@@ -113,9 +113,9 @@ Secrets and confidential information can be securely handle with the help of Has
    - Code pushed to Git.
    - CI/CD pipeline triggered (GitHub Actions).
 2. **Build:**
-   - Docker images built and stored in Amazon ECR / on premises docker registry from the code 
+   - Docker images built and stored in Amazon ECR / on premises docker registry from the code. 
 3. **Scan:**
-   - Scan the docker image with Trivy
+   - Scan the docker image with Trivy or cloud tools.
 3. **Test:**
    - Unit, integration, and security tests run.
 4. **Deploy:**
@@ -159,7 +159,7 @@ Secrets and confidential information can be securely handle with the help of Has
     - Logstash: Processes and ingest log data into Elasticsearch.  
     - Elasticsearch: Stores and indexes log data.
     - Kibana: Visualizes log data through customizable dashboards.
-    - Deploy [ECK] (https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html) on Kubernetes cluster to manage elasticsearch, kibana and logstash on the cluster.
+    - Deploy [ECK](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html) on Kubernetes cluster to manage elasticsearch, kibana and logstash on the cluster.
     - Automation of deployment of filebeat/fluentbit can be achieved by adding them as Applicationsets in the ArgoCD.
 
 3. **Grafana (Metrics Visualization):** 
@@ -175,7 +175,16 @@ Secrets and confidential information can be securely handle with the help of Has
 
 Prometheus, Grafana, vault & ELK stack can be installed and managed inside and ouside of the kubernetes cluster(on same or different). However, deploying them on the kubernetes cluster and automating its management with ArgoCD by adding Applicationsets for each components is the recommended approach.
 
+## Secure the cluster 
+Securing the cluster involves several best practices and built-in features to ensure the security and integrity of the environment.
 
+1. Use cloud features like IAM roles and policies, IAM Role to Service Account, Pod identity, configure security groups, enable audit logs.  
+2. Enable encryption.
+3. Implement network policies.
+4. Scan container images and nodes.
+5. Scan cluster for vulnerabilities with tools like kubeBench.
+6. Perform load test to the application. Tools like k6, Hey can be used.
+7. Use secret management tools like Vault, AWS secret manager, Bitnami Sealed secrets.
 
 
 
