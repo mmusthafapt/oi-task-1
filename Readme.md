@@ -1,9 +1,9 @@
 The proposed solution for this task includes below key points:
 
 1. Selecting the infrastructure platform to use
-    a. Automate the infrastructure deployment 
+    - Automate the infrastructure deployment 
 2. Identify the orchestration technology and their components
-    a. Automate the microservices deployment
+    - Automate the microservices deployment
 3. The release lifecycle for the different components
 4. The testing approach for the infrastructure
 5. The Logging and monitoring approach (obeservability) for the solution
@@ -18,6 +18,8 @@ The infrastructure platform selection depends on the environment where the micro
     
         Due to its extensive flexibility, portability and advanced features EKS would be the more preferable solution for hosting the microservices.
 
+        AWS provide RDS PostgeSQL managed service which is high available and autoscalable. 
+
     2. Azure
 
         Azure AKS provides similar stack for Kubernetes (Azure Kubernetes Service, AKS) and managed PostgreSQL services, with good autoscaling, monitoring, and deployment tools
@@ -27,10 +29,9 @@ The infrastructure platform selection depends on the environment where the micro
         GCP Provides services like GKE and cloud SQL for postgresql which ensures high availability and autoscaling 
 
 - In an on-premise environment, Use of bare metal or virtual servers would be the options to have required compute power. To achieve high availability, redundancy and continuos service availability you need to have:
-    1. Redundant power supply and networking 
-    2. Hardware redundancy with Dual power supplies, raid configurations and redundant hardwares.
-    3. KVM , VMWare, etc provide virtualization and make sure VMs are automatically restarted on another host incase of failures
-    4. Storage redundancy with SAN/NAS , Distributed storage systems 
+    1. Redundant power supply and networking configurations and redundant hardwares.
+    2. KVM , VMWare, etc provide virtualization and make sure VMs are automatically restarted on another host incase of failures
+    3. Storage redundancy with SAN/NAS , Distributed storage systems 
 
     Microservices can be containerized and deployed on Kubernetes clusters created with VMs or BMs as nodes. Kubernetes engines like RedHat Openshift, VMWare Tanzu, Rancher Kubernetes Engine are some available options.
 
@@ -41,11 +42,13 @@ Selecting the AWS as the infrastructure provider, below are the components to be
 - EC2 Instances (for Bastion) and EKS for container orchestration
 - RDS for PostgreSQL (optional as PosgreSQL can be deployed in EKS as well) 
 
-#### Solution to Automate Infrastructure Deployment: Terraform
+#### Solution to Automate Infrastructure Deployment: **Terraform**
 Reason for choice: 
 - Allows defining the complete infrastructure in code 
 - Provides reusable version controlled deployments
 - An example for VPC creation with terraform shown [here](src/infra-automation/aws-vpc.tf)
+
+Jenkins, GitHub Action or similar tools can be used for further automating and implementing CD in infrastructure creation.
 
 ## Orchestration technology and components
 **Kubernetes** is the preferred solution for handling container orchestration due to its scalability, HA & fault tolerance, extensive ecosystem and community support, service discovery, load balancing, security, etc.
@@ -60,7 +63,7 @@ On the other hand, for on premises Rancher Kubernetes Engine 2 is the preferred 
 
 Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once the pre-requisites are verified an ansible playbook similar to [rke2-install.yml](src/infra-automation/rke2-install.yaml) can be used to automate rke2 installation on nodes.
 
-Once the Kubernetes cluster has been created with any of the above suggested approach, along with the basic components please make sure you have the below components also present in the cluster for application accessibility, monitoring:
+Once the Kubernetes cluster has been created with any of the above suggested approach, along with the basic components please make sure you have the below components also present in the cluster for application accessibility and monitoring:
 
 - An **Ingress controller**: Required to manage and route external traffic to services within the cluster. It also helps in Loadbalancing, SSL termination, path and host based routing. Nginx ingress controller or Aws Loadbalancer controller are some preferred solutions.
 - **Metrics server**: A cluster-wide aggregator of resource usage data. Helps in autoscaling, resource monitoring and debugging.
@@ -105,6 +108,8 @@ Automation of the microservices deployment can be achieved using GitOps with **A
 - Install the ArgoCD on a kubernetes cluster with [helm](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd) 
 - Add an *ApplicationSet* for Frontend, backend and DB applications. An example is available in src/Argo/example-applicationset.yaml
 - Create applicatoinsets for backend and database applications as well.
+
+If possible, Deploy ArgoCD just after the cluster creation and manage automation all components of the cluster inside ArgoCD is a recommended approach for complete automation.
 
 Secrets and confidential information can be securely handle with the help of Hashicorp Vault/ AWS Secret manager. Hashicorp vault can be inside or outside the kubernetes cluster. In both cases we need to integrate it with the kubernetes cluster where microservices run. 
 
@@ -164,9 +169,9 @@ Secrets and confidential information can be securely handle with the help of Has
 
 3. **Grafana (Metrics Visualization):** 
     - Grafana provides beautiful dashboards to visualize metrics collected by Prometheus and ELK. It uses prometheus , Elasticsearch as data source and deplay it in customizable dashboards. 
-    - An example dashboard configuration can be seen in src/grafana/dashboard.json
+    - An example dashboard configuration can be seen in [src/grafana/dashboard.json](src/grafana/dashboard.json)
     - Grafana provides an *Alertmanager* to configure and handle alerts.
-    - These alerts can be integrated with Slack, PagerDuty and other messaging services.
+    - These alerts can be integrated with Email, Slack, PagerDuty and other messaging services.
     - Grafana also provide helm chart for installation in Kubernetes. Adding it to the ArgoCD as an applicationset automate the management of Grafana
 
 4. **AWS CloudWatch:** 
@@ -185,6 +190,10 @@ Securing the cluster involves several best practices and built-in features to en
 5. Scan cluster for vulnerabilities with tools like kubeBench.
 6. Perform load test to the application. Tools like k6, Hey can be used.
 7. Use secret management tools like Vault, AWS secret manager, Bitnami Sealed secrets.
+8. Deploy and use service mesh for mTLS, observability and policy enforcement
+9. Use Valero or similar tools for cluster backup and disaster recovery
+
+
 
 
 
