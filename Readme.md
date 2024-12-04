@@ -106,7 +106,7 @@ Note: There are popular third party helm packages available For PostgreSQL datab
 Automation of the microservices deployment can be achieved using GitOps with **ArgoCD** or similar tools. ArgoCD is a more mature GitOps tool with self healing, multi-cluster support and a rich web ui. It support Helm, Kustomize, jsonnet and plain YAML. 
 
 - Install the ArgoCD on a kubernetes cluster with [helm](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd) 
-- Add an *ApplicationSet* for Frontend, backend and DB applications. An example is available in src/Argo/example-applicationset.yaml
+- Add an *ApplicationSet* for Frontend, backend and DB applications. An example is available in [src/Argo/example-applicationset.yaml](src/Argo/example-applicationset.yaml)
 - Create applicatoinsets for backend and database applications as well.
 
 If possible, Deploy ArgoCD just after the cluster creation and manage automation all components of the cluster inside ArgoCD is a recommended approach for complete automation.
