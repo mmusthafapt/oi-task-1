@@ -62,9 +62,9 @@ Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refe
 
 Once the Kubernetes cluster has been created with any of the above suggested approach, along with the basic components please make sure you have the below components also present in the cluster for application accessibility, monitoring:
 
-- An Ingress controller: Required to manage and route external traffic to services within the cluster. It also helps in Loadbalancing, SSL termination, path and host based routing.
+- An Ingress controller: Required to manage and route external traffic to services within the cluster. It also helps in Loadbalancing, SSL termination, path and host based routing. Nginx ingress controller or Aws Loadbalancer controller are some preferred solutions.
 - Metrics server: Is a cluster-wide aggregator of resource usage data. Helps in autoscaling, resource monitoring and debugging.
-- Storage Driver/Storage Class: Essential for managing and provisioning storage resources. Storage classes help in provisioning storage resources dynamically
+- Storage Driver/Storage Class: Essential for managing and provisioning storage resources. Storage classes help in provisioning storage resources dynamically.
      
 We can utilize the below components in the Kubernetes for our requirement:
 - Pods
@@ -78,7 +78,7 @@ We can utilize the below components in the Kubernetes for our requirement:
 
 Assuming the container images for the frontend and backend service have been developed already, frontend and backend microservices can be run as kubernetes *deployment* with multiple replicas. 
 
-*HPA* can be used for ensuring autoscaling of pods according to the cpu/memory/traffic usage. 
+*HPA* can be used for ensuring autoscaling of pods according to the cpu/memory/traffic usage. Resource usage can be captured from metrics server or prometheus server.
 
 *PDB*s can also be implemented to make sure there are no downtime incase of an upgrade or rollout. 
 
@@ -86,7 +86,7 @@ These microservices can be deployed on nodes in the same nodegroup, *nodeSelecto
 
 Kubernetes *service* of type *ClusterIP* can be used to expose the frontend and backend microservices. 
 
-An *Ingress* objecr can be created listening to the  frontend clusterIP service. SSL is terminated at the ingress level. 
+An *Ingress* object can be created listening to the  frontend clusterIP service. SSL is terminated at the ingress level. 
 
 There are two possible approaches for Postgres DB. We can either utilize the AWS RDS for postgresql if we are deploying it on the cloud environment or deploy postgresql as a statefulset inside Kubernetes if you are looking for more control over db.  
 
