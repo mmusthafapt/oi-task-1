@@ -191,7 +191,7 @@ Securing the cluster involves several best practices and built-in features to en
 6. Perform load test to the application. Tools like k6, Hey can be used.
 7. Use secret management tools like Vault, AWS secret manager, Bitnami Sealed secrets.
 8. Deploy and use service mesh for mTLS, observability and policy enforcement
-9. Use Valero or similar tools for cluster backup and disaster recovery
+9. Use ETCD snapshots, Valero or similar tools for cluster backup and disaster recovery
 
 
 
