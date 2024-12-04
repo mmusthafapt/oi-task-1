@@ -56,10 +56,16 @@ In our case we can go with **EKS** (for cloud environment) or **RKE2** (for on-p
 
 Terraform provides modules for deploying EKS and other pre-requisite components on the AWS. These modules ease the deployment of variuos components on AWS instead of identifiying and deploying each minute components. An example usage shows [here](aws-eks.tf).
 
-On the other hand, for on premises I prefer Rancher Kubernetes Engine 2 as it is one of the lightest, opensource, secure, simple yet flexible kubernetes engine that is ideal for enterprise production workloads. 
+On the other hand, for on premises Rancher Kubernetes Engine 2 is the preferred solution as it is one of the lightest, opensource, secure, simple yet flexible kubernetes engine that is ideal for enterprise production workloads. 
 
 Ansible can be used for automating the RKE2 installation on the VMs or BMs. Refer [rke2-doc](https://docs.rke2.io/install/quickstart) for installation. Once the pre-requisites are verified an ansible playbook similar to [rke2-install.yml](./rke2-install.yaml) can be used to automate rke2 installation on nodes.
 
+Once the Kubernetes cluster has been created with any of the above suggested approach, along with the basic components please make sure you have the below components also present in the cluster for application accessibility, monitoring:
+
+- An Ingress controller: Required to manage and route external traffic to services within the cluster. It also helps in Loadbalancing, SSL termination, path and host based routing.
+- Metrics server: Is a cluster-wide aggregator of resource usage data. Helps in autoscaling, resource monitoring and debugging.
+- Storage Driver/Storage Class: Essential for managing and provisioning storage resources. Storage classes help in provisioning storage resources dynamically
+     
 We can utilize the below components in the Kubernetes for our requirement:
 - Pods
 - Deployment
