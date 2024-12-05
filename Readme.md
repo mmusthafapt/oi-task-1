@@ -109,10 +109,6 @@ Automation of the microservices deployment can be achieved using GitOps with **A
 - Add an *ApplicationSet* for Frontend, backend and DB applications. An example is available in [src/Argo/example-applicationset.yaml](src/Argo/example-applicationset.yaml)
 - Create applicatoinsets for backend and database applications as well.
 
-If possible, Deploy ArgoCD just after the cluster creation and manage automation all components of the cluster inside ArgoCD is a recommended approach for complete automation.
-
-Secrets and confidential information can be securely handle with the help of Hashicorp Vault/ AWS Secret manager. Hashicorp vault can be inside or outside the kubernetes cluster. In both cases we need to integrate it with the kubernetes cluster where microservices run. 
-
 ## Release life cycle
 1. **Development:**
    - Code pushed to Git.
@@ -193,7 +189,11 @@ Securing the cluster involves several best practices and built-in features to en
 8. Deploy and use service mesh for mTLS, observability and policy enforcement
 9. Use ETCD snapshots, Valero or similar tools for cluster backup and disaster recovery
 
-
+## Other recommendations
+- If possible, Deploy ArgoCD just after the cluster creation and manage automation of all components of the cluster and microservices inside ArgoCD. This is a recommended approach for complete automation.
+- Secrets and confidential information can be securely handle with the help of Hashicorp Vault/AWS Secret manager. Hashicorp vault can be inside or outside the kubernetes cluster. In both cases we need to integrate it with the kubernetes cluster where microservices run.
+- Rancher is an open-source cluster management platform that can be used in this case. It simplifies the process of deploying the applications in the cluster. It helps in centralized RBAC, CI/CD integration, Monitoring and Alerting, etc.
+ 
 
 
 
