@@ -16,7 +16,7 @@ spec:
     spec:
       project: oi-project
       source:
-        repoURL: https://github.com/infra-team/cluster-deployments.git
+        repoURL: https://github.com/example-repo/example-frontend-deployments.git
         targetRevision: HEAD
         path: oi-front/{{.cluster}}
         helm:
